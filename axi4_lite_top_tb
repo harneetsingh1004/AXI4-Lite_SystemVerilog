@@ -1,0 +1,84 @@
+`timescale 1ns/1ps
+
+module axi4_lite_top_tb;
+
+parameter DATA_WIDTH = 32;
+parameter ADDRESS    = 32;
+
+// Inputs
+reg ACLK;
+reg ARESETN;
+reg read_s;
+reg write_s;
+reg [ADDRESS-1:0] address;
+reg [DATA_WIDTH-1:0] W_data;
+
+// DUT
+axi4_lite_top #(
+    .DATA_WIDTH(DATA_WIDTH),
+    .ADDRESS(ADDRESS)
+) DUT (
+    .ACLK(ACLK),
+    .ARESETN(ARESETN),
+    .read_s(read_s),
+    .write_s(write_s),
+    .address(address),
+    .W_data(W_data)
+);
+
+//----------------------------------------------------
+// Clock Generation
+//----------------------------------------------------
+initial begin
+    ACLK = 0;
+    forever #5 ACLK = ~ACLK;
+end
+
+//----------------------------------------------------
+// Stimulus
+//----------------------------------------------------
+initial begin
+
+    // Initialize
+    ARESETN = 0;
+    read_s  = 0;
+    write_s = 0;
+    address = 32'd0;
+    W_data  = 32'd0;
+
+    // Hold reset
+    #20;
+    ARESETN = 1;
+
+    //------------------------------------------------
+    // WRITE Transaction
+    //------------------------------------------------
+    #20;
+
+    write_s = 1;
+    address = 32'd5;
+    W_data  = 32'd4;
+
+    #10;
+    write_s = 0;
+
+    //------------------------------------------------
+    // READ Transaction
+    //------------------------------------------------
+    #40;
+
+    read_s  = 1;
+    address = 32'd5;
+
+    #10;
+    read_s = 0;
+
+    //------------------------------------------------
+    // End Simulation
+    //------------------------------------------------
+    #100;
+    $finish;
+
+end
+
+endmodule
